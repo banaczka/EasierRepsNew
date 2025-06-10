@@ -10,15 +10,30 @@
 
 ## Intrukcja uruchomienia na emulatorze (wersja trudniejsza, budowanie aplikacji):
 
-1. Instalacja zależności node w folderze projektu:
+1. Instalacja Node JS w katalogu projektu:
+
+   Pobierz instalator ze strony: [https://nodejs.org/](https://nodejs.org/)
+   
+   Wybierz wersję LTS (zalecana)
+   
+   Uruchom instalator i postępuj zgodnie z instrukcjami
+   
+   Sprawdź instalację w CMD:
+
+   ```
+   node -v
+   npm -v
+   ```
+
+2. Instalacja zależności node w folderze projektu:
 
    ```bash
    npm install
    ```
 
-2. Skopiowanie folderu auth/ do node_modules/@firebase **!!! Po zainstalowaniu zależności w punkcie 1 !!!** 
+3. Skopiowanie folderu auth/ do node_modules/@firebase **!!! Po zainstalowaniu zależności w punkcie 1 !!!** 
 
-3. Zbudowanie aplikacji w android studio
+4. Zbudowanie aplikacji w android studio
 
    Link do dokumentacji Expo: https://docs.expo.dev/workflow/android-studio-emulator/
 
@@ -32,7 +47,7 @@
    export PATH=$JAVA_HOME/bin:$PATH
    ```
 
-   Po wykonaniu kroków w dokumentacji powinno udać sie uruchomić poleceniem:
+5. Po wykonaniu kroków w dokumentacji powinno udać sie uruchomić poleceniem:
 
    ```
    npx expo run:android --device
@@ -40,9 +55,24 @@
 
 ## Instrukcja uruchomienia wersji webowej aplikacji
 
-1. Przejście do folderu web/
+1. Instalacja Node JS w katalogu projektu:
 
-2. Uruchomienie lokalnego serwera http, np. w python:
+   Pobierz instalator ze strony: [https://nodejs.org/](https://nodejs.org/)
+   
+   Wybierz wersję LTS (zalecana)
+   
+   Uruchom instalator i postępuj zgodnie z instrukcjami
+   
+   Sprawdź instalację w CMD:
+
+   ```
+   node -v
+   npm -v
+   ```
+
+2. Przejście do folderu web/
+
+3. Uruchomienie lokalnego serwera http, np. w python:
 
    ```
    python3 -m http.server 8000
@@ -60,4 +90,4 @@
    http-server -p 8000
    ```
 
-3. Po wejściu na localhost:8000/pages powinna pojawić sie aplikacja
+4. Po wejściu na localhost:8000/pages powinna pojawić sie aplikacja
