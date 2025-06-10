@@ -55,39 +55,63 @@
 
 ## Instrukcja uruchomienia wersji webowej aplikacji
 
-1. Instalacja Node JS w katalogu projektu:
+Instalacja Node.js
+Pobierz instalator ze strony: [https://nodejs.org/](https://nodejs.org/)
 
-   Pobierz instalator ze strony: [https://nodejs.org/](https://nodejs.org/)
-   
-   Wybierz wersję LTS (zalecana)
-   
-   Uruchom instalator i postępuj zgodnie z instrukcjami
-   
-   Sprawdź instalację w CMD:
+Wybierz wersję LTS (zalecana)
 
-   ```
-   node -v
-   npm -v
-   ```
+Uruchom instalator i postępuj zgodnie z instrukcjami
 
-2. Przejście do folderu web/
+Sprawdź instalację w CMD:
 
-3. Uruchomienie lokalnego serwera http, np. w python:
+```
+node -v
+npm -v
+```
 
-   ```
-   python3 -m http.server 8000
-   ```
+Instalacja http-server
 
-   Lub wykorzystanie serwera http Node, instalacja w katalogu projektu:
+W wierszu poleceń (CMD) wykonaj:
 
-   ```
-   npm install -g http-server
-   ```
+```
+npm install -g http-server
+```
 
-   Z folderu web/ uruchomienie polecenia:
 
-   ```
-   http-server -p 8000
-   ```
+Uruchomienie serwera
 
-4. Po wejściu na localhost:8000/pages powinna pojawić sie aplikacja
+Przejdź do folderu z projektem:
+
+```
+cd /sciezka.projektu/web
+```
+
+
+Uruchom serwer:
+
+```
+http-server
+```
+
+
+Dostęp do aplikacji
+
+Otwórz przeglądarkę i wpisz adres:
+
+http://localhost:8080
+
+
+
+Dodatkowe opcje uruchamiania:
+
+Uruchom na konkretnym porcie (np. 3000):
+
+```
+http-server -p 3000
+```
+
+
+Uruchom z wyłączonym buforowaniem (dla testów):
+```
+http-server -c-1
+```
