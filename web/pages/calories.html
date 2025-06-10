@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Liczenie kalorii</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/calories.css">
+  <script type="module">
+    import { auth, saveMealToFirestore, getTodayMeals, deleteMeal } from '../shared/firebase.js';
+    import { fetchCalories } from '../shared/nutrition.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const form = document.getElementById('calorie-form');
+    const nameInput = document.getElementById('food-name');
+    const gramsInput = document.getElementById('food-grams');
+    const mealList = document.getElementById('meal-list');
+    const totalCalories = document.getElementById('total-calories');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return (window.location.href = 'login.html');
+      await loadMeals();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const grams = parseInt(gramsInput.value);
+      if (!name || !grams || grams <= 0) {
+        alert("Wprowadź poprawne dane");
+        return;
+      }
+      try {
+        const calories = await fetchCalories(name, grams);
+        await saveMealToFirestore(name, Math.round(calories));
+        nameInput.value = '';
+        gramsInput.value = '';
+        await loadMeals();
+      } catch (error) {
+        console.error("Błąd dodawania posiłku:", error);
+        alert("Nie udało się dodać posiłku");
+      }
+    });
+
+    async function loadMeals() {
+      const meals = await getTodayMeals();
+      mealList.innerHTML = '';
+      let total = 0;
+
+      meals.forEach(meal => {
+        const div = document.createElement('div');
+        div.className = 'meal-item';
+        div.innerHTML = `
+          <div class="meal-info">
+            <div class="meal-name">${meal.name}</div>
+            <div class="meal-details">
+              <span class="meal-calories">${meal.calories} kcal</span>
+              <span class="meal-time">${new Date(meal.timestamp?.seconds * 1000).toLocaleTimeString() || 'Teraz'}</span>
+            </div>
+          </div>
+          <button class="delete-meal" data-id="${meal.id}">
+            <span class="material-icons">delete</span>
+          </button>
+        `;
+        div.querySelector('button').addEventListener('click', async () => {
+          await deleteMeal(meal.id);
+          await loadMeals();
+        });
+        mealList.appendChild(div);
+        total += meal.calories;
+      });
+
+      totalCalories.textContent = total;
+    }
+  </script>
+</head>
+<body>
+    <header class="header">
+        <button class="back-button btn btn-primary" onclick="window.location.href = 'profile.html'">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <h1>Licznik Kalorii</h1>
+      </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="daily-summary">
+                <h2>Dzisiejsze kalorie</h2>
+                <div class="calorie-display">
+                    <span id="total-calories">0</span>
+                    <span class="unit">kcal</span>
+                </div>
+            </div>
+        </div>
+    
+
+      <div class="add-meal-section">
+        <h3>Dodaj Posiłek</h3>
+        <form id="calorie-form" class="card">
+          <input type="text" id="food-name" class="input" placeholder="Nazwa produktu" required>
+          <input type="number" id="food-grams" class="input" placeholder="Ilość (w gramach)" required>
+          <button type="submit" class="button">Dodaj</button>
+        </form>
+      </div>
+
+      <div class="meals-list">
+        <h3>Dzisiejsze posiłki</h3>
+        <div id="meal-list"></div>
+      </div>
+    </div>
+
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>

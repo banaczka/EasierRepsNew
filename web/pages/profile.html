@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - EasierReps</title>
+  <link rel="stylesheet" href="../css/styles.css?v=1.1">
+  <script type="module">
+    import { auth } from '../shared/firebase.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const userEmail = document.getElementById("user-email");
+      const logoutBtn = document.getElementById("logout-btn");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+        } else {
+          userEmail.textContent = user.email;
+        }
+      });
+
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <h1>Profil</h1>
+    <button id="logout-btn" class="btn btn-danger">Wyloguj się</button>
+  </header>
+  
+  <main class="page">
+    <div class="auth-card">
+      <div class="form-group">
+        <label>Email użytkownika:</label>
+        <div id="user-email" style="color: #fff; padding: 8px 0;">-</div>
+      </div>
+
+      <div class="navigation">
+        <a href="calories.html" class="nav-item">
+          <span>🍎</span>
+          <span>Kalorie</span>
+        </a>
+        <a href="history.html" class="nav-item">
+          <span>📊</span>
+          <span>Historia treningów</span>
+        </a>
+        <a href="set-reminder.html" class="nav-item">
+          <span>⏰</span>
+          <span>Przypomnienia</span>
+        </a>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>

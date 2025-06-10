@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twoje plany - EasierReps</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/workouts.css">
+  <script type="module">
+    import { auth, getUserPlansWithStats, deletePlan } from '../shared/firebase.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const plansContainer = document.getElementById("plans");
+      const emptyState = document.getElementById("empty-state");
+      const logoutBtn = document.getElementById("logout-btn");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+        } else {
+          loadPlans();
+        }
+      });
+
+      async function loadPlans() {
+        try {
+          const plans = await getUserPlansWithStats();
+          plansContainer.innerHTML = "";
+          if (plans.length === 0) {
+            emptyState.style.display = 'flex';
+            return;
+          } else {
+            emptyState.style.display = 'none';
+          }
+
+          plans.forEach(plan => {
+            const div = document.createElement("div");
+            div.className = "workout-item";
+
+            const exercisesHtml = plan.exercises.map(ex => {
+              return `
+                <div class="exercise-item">
+                  <div class="exercise-name">${ex.name}</div>
+                  <div class="exercise-details">${ex.sets} serie - ${ex.repsRange} powtórzeń</div>
+                </div>
+              `;
+            }).join("");
+
+            const html = `
+              <div class="workout-header">
+                <div>
+                  <div class="workout-name">${plan.name}</div>
+                  <div class="workout-days">Dni: ${plan.days.join(", ")}</div>
+                </div>
+                <button class="delete-btn" data-id="${plan.id}">Usuń</button>
+              </div>
+              <div class="exercises-list">
+                ${exercisesHtml}
+              </div>
+            `;
+
+            div.innerHTML = html;
+            plansContainer.appendChild(div);
+          });
+
+          document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const id = btn.getAttribute("data-id");
+              if (confirm("Czy na pewno chcesz usunąć ten plan?")) {
+                await deletePlan(id);
+                loadPlans();
+              }
+            });
+          });
+        } catch (error) {
+          console.error("Błąd wczytywania planów:", error);
+          plansContainer.innerHTML = '<p class="error">Błąd ładowania danych.</p>';
+        }
+      }
+      
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <button class="back-button btn btn-primary" onclick="window.location.href = 'dashboard.html'">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Twoje plany treningowe</h1>
+    <button id="logout-btn" class="btn btn-danger">Wyloguj się</button>
+  </header>
+  
+  <main class="workouts-container">
+    <a href="new-plan.html" class="create-btn">Stwórz nowy plan</a>
+    <div id="empty-state" class="empty-state" style="display: none; flex-direction: column;">
+      <span class="material-icons">fitness_center</span>
+      <p>Nie masz jeszcze żadnych planów.</p>
+    </div>
+    <div class="workout-list" id="plans"></div>
+  </main>
+  
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item active">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>

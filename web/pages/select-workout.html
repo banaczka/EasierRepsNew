@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wybierz plan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/select-workout.css">
+  <script type="module">
+    import { auth, getUserPlansWithStats } from '../shared/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const plansContainer = document.getElementById("plans");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        try {
+          plansContainer.innerHTML = `
+            <div class="loading">
+              <div class="loading-spinner"></div>
+              <p>Ładowanie planów...</p>
+            </div>
+          `;
+
+          const plans = await getUserPlansWithStats();
+          sessionStorage.setItem("plans", JSON.stringify(plans));
+
+          if (plans.length === 0) {
+            plansContainer.innerHTML = `
+              <div class="no-plans">
+                <span class="material-icons">fitness_center</span>
+                <p>Brak dostępnych planów.</p>
+                <a href="new-plan.html" class="btn btn-primary">Utwórz pierwszy plan</a>
+              </div>
+            `;
+            return;
+          }
+
+          const plansList = document.createElement('div');
+          plansList.className = 'plans-list';
+
+          plans.forEach(plan => {
+            const planDiv = document.createElement("div");
+            planDiv.className = "plan-card";
+
+            const exercisesHtml = plan.exercises.slice(0, 3).map(ex => {
+              return `<div class="exercise-item">${ex.name} - ${ex.sets} serie (${ex.repsRange} powt.)</div>`;
+            }).join("");
+
+            const moreExercises = plan.exercises.length > 3 ? 
+              `<div class="exercise-item">... i ${plan.exercises.length - 3} więcej</div>` : '';
+
+            planDiv.innerHTML = `
+              <div class="plan-header">
+                <div class="plan-name">${plan.name}</div>
+              </div>
+              <div class="plan-days">
+                ${plan.days.map(day => `<span class="day-tag">${day}</span>`).join('')}
+              </div>
+              <div class="exercises-preview">
+                <div class="exercises-count">${plan.totalExercises} ćwiczeń, ${plan.totalSets} serii</div>
+                ${exercisesHtml}
+                ${moreExercises}
+              </div>
+              <button class="start-button" data-id="${plan.id}" data-name="${plan.name}">
+                <span class="material-icons">play_arrow</span>
+                Rozpocznij trening
+              </button>
+            `;
+
+            plansList.appendChild(planDiv);
+          });
+
+          plansContainer.innerHTML = '';
+          plansContainer.appendChild(plansList);
+
+          document.querySelectorAll(".start-button").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-id");
+              const name = btn.getAttribute("data-name");
+              sessionStorage.setItem("selectedPlanId", id);
+              sessionStorage.setItem("selectedPlanName", name);
+              window.location.href = "active-workout.html";
+            });
+          });
+
+        } catch (err) {
+          console.error("Błąd wczytywania planów:", err);
+          plansContainer.innerHTML = '<p>Wystąpił błąd podczas ładowania planów.</p>';
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <h1>Wybierz plan treningowy</h1>
+  </header>
+  
+  <div class="plans-container">
+    <div id="plans"></div>
+  </div>
+  
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item active">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>

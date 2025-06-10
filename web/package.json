@@ -1,0 +1,22 @@
+{
+  "name": "easierreps-web",
+  "version": "1.0.0",
+  "description": "EasierReps - Aplikacja treningowa (wersja web)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "firebase deploy"
+  },
+  "dependencies": {
+    "firebase": "^11.7.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": ["fitness", "workout", "training", "firebase"],
+  "author": "EasierReps Team",
+  "license": "MIT"
+}

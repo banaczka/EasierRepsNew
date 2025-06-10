@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trening</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/active-workout.css">
+</head>
+<body>
+  <div class="workout-container">
+    <h1>Trening</h1>
+    <div id="workout" class="loading-screen">
+      <div class="loading-spinner"></div>
+      <p>Ładowanie treningu...</p>
+    </div>
+    
+    <div id="form" class="hidden">
+      <div class="exercise-state">
+        <div class="exercise-info"></div>
+        <div class="input-container">
+          <div class="input-group">
+            <label>Powtórzenia</label>
+            <input type="number" id="reps" min="1">
+          </div>
+          <div class="input-group">
+            <label>Ciężar (kg)</label>
+            <input type="number" id="weight" min="0">
+          </div>
+        </div>
+        <div class="rest-input">
+          <label>Czas odpoczynku (sekundy)</label>
+          <input type="number" id="rest" min="0">
+        </div>
+        <button id="complete-set" class="btn btn-primary">Zakończ serię</button>
+        <button id="cancel-workout" class="btn btn-danger">Przerwij trening</button>
+      </div>
+    </div>
+    
+    <div class="timer hidden">
+      <div class="rest-mode">
+        <h2>Odpoczynek</h2>
+        <p id="timer-message" class="next-exercise-info"></p>
+        <div class="timer-display">
+          <span id="timer">0</span>
+          <span class="timer-unit">s</span>
+        </div>
+        <div class="timer-controls">
+          <button id="add-30" class="btn btn-secondary">+30s</button>
+          <button id="skip" class="btn btn-secondary">Pomiń</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, saveWorkoutSession } from '../shared/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    let plan = null;
+    let currentExercise = 0;
+    let currentSet = 0;
+    let completed = [];
+    let isResting = false;
+    let timerInterval = null;
+
+    window.addEventListener('beforeunload', (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'login.html';
+      const id = sessionStorage.getItem('selectedPlanId');
+      const rawPlans = JSON.parse(sessionStorage.getItem('plans') || '[]');
+      plan = rawPlans.find(p => p.id === id);
+      if (!plan) {
+        document.getElementById('workout').innerHTML = '<p>Nie znaleziono planu.</p>';
+        return;
+      }
+      plan.exercises.forEach(e => completed.push({ name: e.name, sets: [] }));
+      showExercise();
+    });
+
+    function showExercise() {
+      document.getElementById('workout').classList.add('hidden');
+      document.getElementById('form').classList.remove('hidden');
+      const ex = plan.exercises[currentExercise];
+      const el = document.querySelector('.exercise-info');
+      el.innerHTML = `
+        <h2>${ex.name}</h2>
+        <p class="set-info">Seria ${currentSet + 1} / ${ex.sets}</p>
+        <p class="reps-info">Zakres powtórzeń: ${ex.repsRange}</p>
+      `;
+    }
+
+    document.getElementById('complete-set').addEventListener('click', () => {
+      if (isResting) return;
+
+      const reps = parseInt(document.getElementById('reps').value, 10);
+      const weight = parseInt(document.getElementById('weight').value, 10);
+      const rest = parseInt(document.getElementById('rest').value, 10);
+
+      if (!Number.isInteger(reps) || reps <= 0) return alert('Nieprawidłowa liczba powtórzeń');
+      if (!Number.isInteger(weight) || weight < 0) return alert('Nieprawidłowy ciężar');
+      if (!Number.isInteger(rest) || rest < 0) return alert('Nieprawidłowy czas odpoczynku');
+
+      const ex = plan.exercises[currentExercise];
+      completed[currentExercise].sets.push({ reps, weight });
+
+      document.getElementById('reps').value = '';
+      document.getElementById('weight').value = '';
+      document.getElementById('rest').value = '';
+
+      if (completed[currentExercise].sets.length === ex.sets) {
+        currentExercise++;
+        currentSet = 0;
+      } else {
+        currentSet++;
+      }
+
+      if (currentExercise >= plan.exercises.length) {
+        finishWorkout();
+      } else {
+        startRest(rest);
+      }
+    });
+
+    function startRest(seconds) {
+      isResting = true;
+      document.getElementById('form').classList.add('hidden');
+      const timerDiv = document.querySelector('.timer');
+      timerDiv.classList.remove('hidden');
+      let remaining = seconds;
+
+      const nextEx = plan.exercises[currentExercise];
+      document.getElementById('timer-message').innerText = `Następnie: ${nextEx.name} (seria 1/${nextEx.sets})`;
+
+      document.getElementById('timer').innerText = remaining;
+      timerInterval = setInterval(() => {
+        remaining--;
+        document.getElementById('timer').innerText = remaining;
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          timerDiv.classList.add('hidden');
+          isResting = false;
+          showExercise();
+        }
+      }, 1000);
+
+      document.getElementById('add-30').onclick = () => {
+        remaining += 30;
+        document.getElementById('timer').innerText = remaining;
+      };
+
+      document.getElementById('skip').onclick = () => {
+        clearInterval(timerInterval);
+        timerDiv.classList.add('hidden');
+        isResting = false;
+        showExercise();
+      };
+    }
+
+    document.getElementById('cancel-workout').addEventListener('click', () => {
+      if (confirm("Na pewno przerwać trening?")) {
+        window.removeEventListener('beforeunload', () => {});
+        window.location.href = 'select-workout.html';
+      }
+    });
+
+    async function finishWorkout() {
+      try {
+        await saveWorkoutSession(plan.id, completed);
+        window.removeEventListener('beforeunload', () => {});
+        alert("Trening zapisany!");
+        window.location.href = 'history.html';
+      } catch (e) {
+        alert("Błąd zapisu treningu.");
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>

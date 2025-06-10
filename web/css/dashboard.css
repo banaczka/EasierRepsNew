@@ -1,0 +1,144 @@
+/* Style specyficzne dla ekranu dashboard */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 24px; 
+    padding-top: 15px; 
+    min-height: calc(100vh - 180px); 
+    background-color: #121212;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 60px; 
+    gap: 20px; 
+}
+.greeting {
+    font-size: 24px; 
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px; 
+    text-align: center;
+}
+
+.subtitle {
+    font-size: 16px; 
+    color: #ccc;
+    margin-bottom: 15px; 
+    text-align: center;
+}
+
+.start-button {
+    background-color: #10b981;
+    color: #fff;
+    padding: 14px 28px; 
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px; 
+    margin-top: 15px; 
+    width: 100%;
+    max-width: 600px;
+}
+
+.stat-card {
+    background-color: #1e1e1e;
+    border-radius: 12px;
+    padding: 14px; 
+    width: calc(50% - 12px); 
+    min-width: 140px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.stat-title {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 6px; 
+}
+
+.stat-value {
+    font-size: 22px; 
+    font-weight: bold;
+    color: #10b981;
+}
+
+.recent-workouts {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 15px; 
+}
+
+.section-title {
+    font-size: 18px; 
+    color: #fff;
+    margin-bottom: 12px; 
+    text-align: left;
+    width: 100%;
+}
+
+.workout-item {
+    background-color: #1e1e1e;
+    border-radius: 12px;
+    padding: 14px; 
+    margin-bottom: 10px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.workout-name {
+    font-size: 15px; 
+    color: #fff;
+}
+
+.workout-date {
+    font-size: 13px; 
+    color: #aaa;
+}
+
+/* Animacja karty */
+.stat-card:hover {
+    transform: translateY(-4px);
+    transition: transform 0.3s ease;
+}
+
+.workouts-scroll-container {
+    max-height: 200px; 
+    overflow-y: auto;
+    border-radius: 12px;
+    background: #1e1e1e;
+    padding: 8px;
+}
+
+@media (max-height: 700px) {
+    .dashboard-container {
+        padding-top: 10px;
+    }
+
+    .greeting {
+        font-size: 22px;
+    }
+        
+    .subtitle {
+        font-size: 14px;
+    }
+        
+    .start-button {
+        padding: 12px 24px;
+    }
+        
+    .workouts-scroll-container {
+        max-height: 150px;
+    }
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historia treningów - EasierReps</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/history.css">
+  <script type="module">
+    import { auth, getWorkoutHistory, deleteWorkoutSession } from '../shared/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const historyContainer = document.getElementById("history");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+        } else {
+          loadHistory();
+        }
+      });
+
+      async function loadHistory() {
+        try {
+          const history = await getWorkoutHistory();
+          historyContainer.innerHTML = '';
+
+          if (history.length === 0) {
+            historyContainer.innerHTML = `
+              <div class="no-history">
+                <span class="material-icons">fitness_center</span>
+                <p>Brak historii treningów.</p>
+              </div>
+            `;
+            return;
+          }
+
+          const historyList = document.createElement('div');
+          historyList.className = 'history-list';
+
+          history.forEach(session => {
+            const div = document.createElement("div");
+            div.className = "workout-item";
+
+            const date = new Date(session.date.seconds * 1000);
+            const dateStr = date.toLocaleDateString("pl-PL");
+            const timeStr = date.toLocaleTimeString("pl-PL", { hour: '2-digit', minute: '2-digit' });
+
+            let html = `
+              <div class="workout-header">
+                <div>
+                  <div class="workout-name">${session.name}</div>
+                  <div class="workout-date">${dateStr} ${timeStr}</div>
+                </div>
+                <button class="delete-workout" data-id="${session.id}">Usuń</button>
+              </div>
+            `;
+
+            if (session.exercises && session.exercises.length > 0) {
+              html += '<div class="exercises-list">';
+              session.exercises.forEach(ex => {
+                html += `
+                  <div class="exercise-item">
+                    <div class="exercise-name">${ex.name}</div>
+                    <div class="sets-list">
+                `;
+                ex.sets.forEach((set, idx) => {
+                  if (set.weight > 0) {
+                    html += `<div class="set-info">Seria ${idx + 1}: ${set.reps} powtórzeń x ${set.weight} kg</div>`;
+                  } else {
+                    html += `<div class="set-info">Seria ${idx + 1}: ${set.reps} powtórzeń</div>`;
+                  }
+                });
+                html += `
+                    </div>
+                  </div>
+                `;
+              });
+              html += '</div>';
+            }
+
+            div.innerHTML = html;
+            historyList.appendChild(div);
+          });
+
+          historyContainer.appendChild(historyList);
+
+          document.querySelectorAll('.delete-workout').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const id = btn.getAttribute('data-id');
+              if (confirm('Czy na pewno chcesz usunąć ten trening?')) {
+                await deleteWorkoutSession(id);
+                loadHistory();
+              }
+            });
+          });
+        } catch (error) {
+          console.error("Błąd wczytywania historii:", error);
+          historyContainer.innerHTML = '<p>Błąd wczytywania danych.</p>';
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <button class="back-button btn btn-primary" onclick="window.location.href = 'profile.html'">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Historia treningów</h1>
+  </header>
+  
+  <main class="history-container">
+    <div id="history"></div>
+  </main>
+  
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>

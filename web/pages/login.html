@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logowanie - EasierReps</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/login.css">
+  <script type="module">
+    import { auth } from '../shared/firebase.js';
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("login-form");
+      const errorDisplay = document.getElementById("error-msg");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorDisplay.textContent = "";
+
+        const email = form.email.value;
+        const password = form.password.value;
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          errorDisplay.textContent = "Nieprawidłowy e-mail lub hasło.";
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h2 class="login-title">Zaloguj się</h2>
+      <form id="login-form">
+        <input type="email" name="email" class="login-input" placeholder="Email" required />
+        <input type="password" name="password" class="login-input" placeholder="Hasło" required />
+        <div class="login-error" id="error-msg"></div>
+        <button type="submit" class="login-button">Zaloguj</button>
+      </form>
+      <a class="login-link" href="register.html">Nie masz konta? Zarejestruj się</a>
+    </div>
+  </div>
+</body>
+</html>

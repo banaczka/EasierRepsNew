@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - EasierReps</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script type="module">
+    import {
+      auth,
+      getUserPlansWithStats,
+      countUserPlans,
+      countWeeklyWorkoutDays,
+      getTodayMeals,
+      getLastWorkoutDate,
+      getWorkoutHistory
+    } from '../shared/firebase.js';
+
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const userEmail = document.getElementById("user-email");
+      const logoutBtn = document.getElementById("logout-btn");
+      const plansEl = document.getElementById("plans-count");
+      const daysEl = document.getElementById("weekly-days");
+      const caloriesEl = document.getElementById("today-calories");
+      const lastWorkoutEl = document.getElementById("last-workout");
+      const recentWorkoutsEl = document.getElementById("recent-workouts");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+        } else {
+          userEmail.textContent = user.email;
+
+          try {
+            const [plansCount, daysCount, meals, lastWorkoutDate, workouts] = await Promise.all([
+              countUserPlans(),
+              countWeeklyWorkoutDays(),
+              getTodayMeals(),
+              getLastWorkoutDate(),
+              getWorkoutHistory()
+            ]);
+
+            plansEl.textContent = plansCount;
+            daysEl.textContent = daysCount;
+            caloriesEl.textContent = meals.reduce((sum, m) => sum + m.calories, 0);
+            lastWorkoutEl.textContent = lastWorkoutDate ? new Date(lastWorkoutDate).toLocaleString() : "Brak danych";
+
+            if (workouts.length > 0) {
+              recentWorkoutsEl.innerHTML = workouts.slice(0, 2).map(w => `
+                <li class="workout-item">
+                  <span class="workout-name">${w.name}</span>
+                  <span class="workout-date">${new Date(w.date.seconds * 1000).toLocaleDateString()}</span>
+                </li>
+              `).join('');
+            } else {
+              recentWorkoutsEl.innerHTML = '<li class="workout-item">Brak sesji treningowych</li>';
+            }
+          } catch (err) {
+            console.error("Błąd pobierania danych dashboardu:", err);
+          }
+        }
+      });
+
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+</head>
+<body>
+    <header class="header">
+      <h1>Strona główna</h1>
+      <button id="logout-btn" class="btn btn-danger">Wyloguj się</button>
+    </header>
+    
+    <div class="dashboard-container">
+      <main class="main-content">
+        <h1 class="greeting">Witaj, <span id="user-email">...</span></h1>
+        <p class="subtitle">Gotowy na trening?</p>
+        <a href="select-workout.html" class="start-button">Rozpocznij trening</a>
+        
+        <section class="stats-container">
+          <div class="stat-card">
+            <h3 class="stat-title">Aktywne plany</h3>
+            <p class="stat-value" id="plans-count">-</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-title">Treningi / tydzień</h3>
+            <p class="stat-value" id="weekly-days">-</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-title">Kalorie dziś</h3>
+            <p class="stat-value" id="today-calories">-</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-title">Ostatni trening</h3>
+            <p class="stat-value" id="last-workout">-</p>
+          </div>
+        </section>
+  
+        <section class="recent-workouts">
+          <h2 class="section-title">Ostatnie sesje</h2>
+          <div class="workouts-scroll-container">
+            <ul id="recent-workouts">
+              <li class="workout-item">Ładowanie...</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+    
+    <footer class="bottom-nav">
+      <a href="dashboard.html" class="nav-item active">
+        <span>🏠</span>
+        <span class="nav-text">Strona Główna</span>
+      </a>
+      <a href="workouts.html" class="nav-item">
+        <span>💪</span>
+        <span class="nav-text">Treningi</span>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <span>👤</span>
+        <span class="nav-text">Profil</span>
+      </a>
+    </footer>
+  </body>
+  </html>

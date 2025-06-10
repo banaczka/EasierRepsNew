@@ -1,0 +1,151 @@
+/* Mobile First - domyślnie dla telefonów */
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .button {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .card {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .bottom-nav .nav-item {
+    margin: 0 5px;
+    padding: 5px 0;
+  }
+
+  .bottom-nav .nav-item span {
+    font-size: 20px;
+  }
+
+  .bottom-nav .nav-item .nav-text {
+    font-size: 10px;
+  }
+}
+
+/* Tablety */
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    padding: 32px;
+  }
+
+  .card {
+    width: 80%;
+    max-width: 500px;
+  }
+
+  .menu-container {
+    width: 80%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .bottom-nav .nav-item {
+    margin: 0 15px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 769px) {
+  .container {
+    padding: 40px;
+  }
+
+  .card {
+    width: 60%;
+    max-width: 600px;
+  }
+
+  .bottom-nav {
+    width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 12px 12px 0 0;
+    border: 1px solid #333;
+    border-bottom: none;
+  }
+
+  .bottom-nav .nav-item {
+    margin: 0 20px;
+  }
+
+  .workout-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .menu-container {
+    width: 60%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* Orientacja pozioma na telefonach */
+@media (max-height: 500px) and (orientation: landscape) {
+  .container {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .bottom-nav {
+    height: 50px;
+  }
+
+  .bottom-nav .nav-item span {
+    font-size: 18px;
+  }
+
+  .bottom-nav .nav-item .nav-text {
+    font-size: 10px;
+  }
+}
+
+/* Ciemny motyw (domyślny) */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #fff;
+  }
+}
+
+/* Jasny motyw (opcjonalny) */
+@media (prefers-color-scheme: light) {
+  body {
+    background-color: #f5f5f5;
+    color: #121212;
+  }
+
+  .card,
+  .menu-item,
+  .bottom-nav {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .input {
+    background-color: #f0f0f0;
+    color: #121212;
+    border-color: #ddd;
+  }
+
+  .title,
+  .menu-text {
+    color: #121212;
+  }
+}

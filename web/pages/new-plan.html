@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nowy plan - EasierReps</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/new-plan.css">
+  <script type="module">
+    import { auth, savePlanToFirestore } from '../shared/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    let exercises = [];
+    let selectedDays = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("plan-form");
+      const exercisesContainer = document.getElementById("exercises-list");
+      const addBtn = document.getElementById("add-exercise");
+      const errorText = document.getElementById("error-text");
+
+      onAuthStateChanged(auth, (user) => {
+        if (!user) window.location.href = 'login.html';
+      });
+
+      // Day selection
+      document.querySelectorAll('.day-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const day = btn.dataset.day;
+          if (selectedDays.includes(day)) {
+            selectedDays = selectedDays.filter(d => d !== day);
+            btn.classList.remove('selected');
+          } else {
+            selectedDays.push(day);
+            btn.classList.add('selected');
+          }
+        });
+      });
+
+      addBtn.addEventListener("click", () => {
+        const name = document.getElementById("ex-name").value.trim();
+        const sets = parseInt(document.getElementById("ex-sets").value);
+        const min = parseInt(document.getElementById("ex-min").value);
+        const max = parseInt(document.getElementById("ex-max").value);
+
+        if (!name || isNaN(sets) || isNaN(min) || isNaN(max)) {
+          alert("Uzupełnij wszystkie pola poprawnie.");
+          return;
+        }
+
+        if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ0-9 ]+$/.test(name)) {
+          alert("Nazwa ćwiczenia nie może zawierać znaków specjalnych.");
+          return;
+        }
+
+        if (sets <= 0 || !Number.isInteger(sets)) {
+          alert("Liczba serii musi być dodatnią liczbą całkowitą.");
+          return;
+        }
+
+        if (!Number.isInteger(min) || !Number.isInteger(max) || min <= 0 || max <= 0) {
+          alert("Minimalna i maksymalna liczba powtórzeń muszą być dodatnimi liczbami całkowitymi.");
+          return;
+        }
+
+        if (min > max) {
+          alert("Minimalna liczba powtórzeń nie może być większa niż maksymalna.");
+          return;
+        }
+
+        const exercise = {
+          name,
+          sets,
+          repsRange: `${min}-${max}`
+        };
+
+        exercises.push(exercise);
+        renderExercises();
+
+        document.getElementById("ex-name").value = "";
+        document.getElementById("ex-sets").value = "3";
+        document.getElementById("ex-min").value = "8";
+        document.getElementById("ex-max").value = "12";
+      });
+
+      function renderExercises() {
+        if (exercises.length === 0) {
+          exercisesContainer.innerHTML = `
+            <div class="no-exercises">
+              <span class="material-icons">fitness_center</span>
+              <p>Brak dodanych ćwiczeń</p>
+            </div>
+          `;
+          return;
+        }
+
+        exercisesContainer.innerHTML = "";
+        exercises.forEach((ex, index) => {
+          const div = document.createElement("div");
+          div.className = "exercise-item";
+          div.innerHTML = `
+            <div class="exercise-info">
+              <div class="exercise-name">${ex.name}</div>
+              <div class="exercise-details">${ex.sets} serie - ${ex.repsRange} powt.</div>
+            </div>
+            <div class="exercise-actions">
+              <button type="button" data-index="${index}" class="btn btn-small btn-danger">Usuń</button>
+            </div>
+          `;
+          exercisesContainer.appendChild(div);
+        });
+
+        document.querySelectorAll(".btn-danger").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = btn.getAttribute("data-index");
+            exercises.splice(idx, 1);
+            renderExercises();
+          });
+        });
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorText.textContent = '';
+
+        const name = form.planName.value.trim();
+
+        if (!name || name.length < 2) {
+          errorText.textContent = "Nazwa planu jest nieprawidłowa";
+          return;
+        }
+
+        if (selectedDays.length === 0) {
+          errorText.textContent = "Wybierz co najmniej jeden dzień";
+          return;
+        }
+
+        if (!Array.isArray(exercises) || exercises.length === 0) {
+          errorText.textContent = "Brak ćwiczeń w planie";
+          return;
+        }
+
+        try {
+          await savePlanToFirestore(name, selectedDays, exercises);
+          window.location.href = 'workouts.html';
+        } catch (err) {
+          errorText.textContent = err.message || 'Błąd zapisu planu';
+        }
+      });
+
+      renderExercises();
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <button class="back-button" onclick="window.location.href = 'workouts.html'">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Nowy plan treningowy</h1>
+  </header>
+  
+  <div class="plan-container">
+    <form id="plan-form" class="plan-form">
+      <div class="form-section">
+        <h3>Podstawowe informacje</h3>
+        <div class="form-group">
+          <input type="text" id="planName" name="planName" placeholder="Nazwa planu" required>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Wybierz dni tygodnia</h3>
+        <div class="days-container">
+          <button type="button" class="day-button" data-day="Pn">Pn</button>
+          <button type="button" class="day-button" data-day="Wt">Wt</button>
+          <button type="button" class="day-button" data-day="Śr">Śr</button>
+          <button type="button" class="day-button" data-day="Czw">Czw</button>
+          <button type="button" class="day-button" data-day="Pt">Pt</button>
+          <button type="button" class="day-button" data-day="Sb">Sb</button>
+          <button type="button" class="day-button" data-day="Nd">Nd</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Dodaj ćwiczenia</h3>
+        <div class="exercise-form">
+          <div class="form-group">
+            <input type="text" id="ex-name" placeholder="Nazwa ćwiczenia">
+          </div>
+          <div class="form-row">
+            <input type="number" id="ex-sets" placeholder="Serie" value="3">
+            <input type="number" id="ex-min" placeholder="Min powt." value="8">
+            <input type="number" id="ex-max" placeholder="Max powt." value="12">
+          </div>
+          <button type="button" class="btn btn-secondary" id="add-exercise">Dodaj ćwiczenie</button>
+        </div>
+
+        <div class="exercises-list" id="exercises-list"></div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Zapisz plan</button>
+        <div id="error-text" class="notification notification-error"></div>
+      </div>
+    </form>
+  </div>
+  
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item active">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>

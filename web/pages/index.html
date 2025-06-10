@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasierReps - Web</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script type="module">
+        import { auth } from '../shared/firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        document.addEventListener("DOMContentLoaded", () => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "dashboard.html";
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+        });
+    </script>
+</head>
+<body>
+    <div class="loading">
+        <h1>Ładowanie...</h1>
+    </div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rejestracja - EasierReps</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/login.css">
+  <script type="module">
+    import { auth } from '../shared/firebase.js';
+    import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("register-form");
+      const errorText = document.getElementById("error-text");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = form.email.value.trim();
+        const password = form.password.value;
+        const repeatPassword = form.repeatPassword.value;
+
+        if (!email.includes("@") || email.length < 6) {
+          errorText.textContent = "Nieprawidłowy email";
+          return;
+        }
+
+        if (password.length < 6) {
+          errorText.textContent = "Hasło musi mieć co najmniej 6 znaków";
+          return;
+        }
+
+        if (password !== repeatPassword) {
+          errorText.textContent = "Hasła muszą być takie same";
+          return;
+        }
+
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          console.error("Błąd rejestracji:", error);
+          if (error.code === 'auth/email-already-in-use') {
+            errorText.textContent = "Email jest już zajęty";
+          } else {
+            errorText.textContent = "Błąd rejestracji. Spróbuj ponownie";
+          }
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h1 class="login-title">Załóż konto</h1>
+      <form id="register-form">
+        <input type="email" name="email" class="login-input" placeholder="Email" required>
+        <input type="password" name="password" class="login-input" placeholder="Hasło" required>
+        <input type="password" name="repeatPassword" class="login-input" placeholder="Powtórz hasło" required>
+        <button type="submit" class="login-button">Zarejestruj się</button>
+        <div class="login-error" id="error-text"></div>
+        <a class="login-link" href="login.html">Masz już konto? Zaloguj się</a>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

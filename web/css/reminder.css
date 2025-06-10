@@ -1,0 +1,107 @@
+/* set-reminder.css - zaktualizowany */
+.reminder-container {
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.reminder-card {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+.reminder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.reminder-card p {
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.delete-reminder-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.delete-reminder-btn:hover {
+  background-color: #c0392b;
+}
+
+.reminder-form {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #333;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #2c2c2c;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6200ee;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.btn-primary {
+  background: #6200ee;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5000d4;
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 18px;
+  }
+}
+  .delete-reminder-btn {
+    align-self: flex-end;
+  }

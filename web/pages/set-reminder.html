@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Ustaw przypomnienie</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/reminder.css">
+  <style>
+    /* Dodatkowe style tylko dla tej strony */
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+    
+    .header h1 {
+      margin: 0;
+      flex-grow: 1;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    
+    .back-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px !important;
+      border-radius: 8px;
+      background: #6200ee;
+      color: white;
+      transition: background-color 0.2s;
+      border: none;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      margin-right: 12px;
+    }
+    
+    .back-button:hover {
+      background: #5000d4;
+    }
+    
+    .back-button .material-icons {
+      font-size: 24px;
+    }
+    
+    @media (max-width: 480px) {
+      .header {
+        padding: 1rem;
+      }
+      
+      .header h1 {
+        font-size: 1.2rem;
+      }
+      
+      .back-button {
+        width: 36px;
+        height: 36px;
+        padding: 6px !important;
+      }
+      
+      .back-button .material-icons {
+        font-size: 20px;
+      }
+    }
+  </style>
+  <script type="module">
+    import { auth, saveNotification, getUserNotification, deleteUserNotification } from '../shared/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("reminder-form");
+      const currentReminderDiv = document.getElementById("current-reminder");
+      const titleInput = document.getElementById("title");
+      const hourInput = document.getElementById("hour");
+      const minuteInput = document.getElementById("minute");
+
+      onAuthStateChanged(auth, async user => {
+        if (!user) return window.location.href = "login.html";
+        const notification = await getUserNotification(user.uid);
+        if (notification) {
+          currentReminderDiv.style.display = "block";
+          currentReminderDiv.innerHTML = `
+            <div class="reminder-header">
+              <p><strong>Aktualne przypomnienie:</strong><br>
+              ${notification.title} o ${notification.hour.toString().padStart(2, '0')}:${notification.minute.toString().padStart(2, '0')}</p>
+              <button class="delete-reminder-btn" id="delete-reminder">Anuluj</button>
+            </div>
+          `;
+
+          document.getElementById("delete-reminder").addEventListener("click", async () => {
+            if (confirm('Czy na pewno chcesz anulować to przypomnienie?')) {
+              await deleteUserNotification(user.uid);
+              window.location.reload();
+            }
+          });
+        }
+      });
+
+      form.addEventListener("submit", async e => {
+        e.preventDefault();
+        const title = titleInput.value.trim();
+        const hour = parseInt(hourInput.value);
+        const minute = parseInt(minuteInput.value);
+
+        if (!title || isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+          alert("Wprowadź poprawne dane przypomnienia.");
+          return;
+        }
+
+        try {
+          await saveNotification("Przypomnienie o suplementach", title, hour, minute);
+          alert("Przypomnienie zapisane");
+          window.location.reload();
+        } catch (err) {
+          console.error("Błąd zapisu przypomnienia:", err);
+          alert("Błąd zapisu przypomnienia");
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <button class="back-button" onclick="window.location.href = 'profile.html'">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Ustaw przypomnienie</h1>
+  </header>
+  
+  <main class="reminder-container">
+    <div id="current-reminder" class="reminder-card" style="display: none;"></div>
+    
+    <form id="reminder-form" class="reminder-form">
+      <div class="form-group">
+        <label for="title">Treść przypomnienia</label>
+        <input type="text" id="title" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="hour">Godzina (0-23)</label>
+        <input type="number" id="hour" min="0" max="23" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="minute">Minuta (0-59)</label>
+        <input type="number" id="minute" min="0" max="59" required>
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Zapisz przypomnienie</button>
+    </form>
+  </main>
+  
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span>🏠</span>
+      <span class="nav-text">Strona Główna</span>
+    </a>
+    <a href="workouts.html" class="nav-item">
+      <span>💪</span>
+      <span class="nav-text">Treningi</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <span>👤</span>
+      <span class="nav-text">Profil</span>
+    </a>
+  </footer>
+</body>
+</html>
