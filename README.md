@@ -1,50 +1,43 @@
-# Welcome to your Expo app 👋
+# Aplikacja Easier Reps
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Instrukcja uruchomienia aplikacji (wersja prosta, bardziej rekomendowana):
 
-## Get started
+1. Zainstalowanie pliku apk na emulatorze (przeciągnięcie pliku) lub na fizycznym urządzeniu
 
-1. Install dependencies
+   Plik apk powinien znajdować sie w projekcie, jeśli nie ma to poniżej jest link do pobrania
+
+   Link do apk: https://expo.dev/accounts/banaczka/projects/EasierRepsNew/builds/103e74d3-9fa2-4120-8f19-c72f7abe4a19
+
+## Intrukcja uruchomienia na emulatorze (wersja budowania aplikacji):
+
+1. Instalacja zależności node w folderze projektu:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Skopiowanie folderu auth/ do node_modules/@firebase !!! Po zainstalowaniu zależności w punkcie 1 !!! 
 
-   ```bash
-   npx expo start
+3. Zbudowanie aplikacji w android studio
+
+   Link do dokumentacji Expo: https://docs.expo.dev/workflow/android-studio-emulator/
+
+   Możliwe że potrzebna będzie instalacja wersji javy jdk-17 i ustawienie 
+
+   Po wykonaniu kroków w dokumentacji powinno udać sie uruchomić poleceniem:
+
+   ```
+   npx expo run:android --device
    ```
 
-In the output, you'll find options to open the app in a
+## Instrukcja uruchomienia wersji webowej aplikacji
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Przejście do folderu web/
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+2. Uruchomienie lokalnego serwera http, np. w python:
 
-## Get a fresh project
+   ```
+   python3 -m http.server 8000
+   ```
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. Po wejściu na localhost:8000/pages powinna pojawić sie aplikacja
